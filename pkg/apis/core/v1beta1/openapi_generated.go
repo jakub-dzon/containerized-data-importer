@@ -13758,7 +13758,7 @@ func schema_pkg_apis_core_v1beta1_CDIStatus(ref common.ReferenceCallback) common
 					},
 					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Description: "A list of current conditions of the CDI resource",
+							Description: "A list of current conditions of the resource",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -13771,21 +13771,21 @@ func schema_pkg_apis_core_v1beta1_CDIStatus(ref common.ReferenceCallback) common
 					},
 					"operatorVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The version of the CDI resource as defined by the operator",
+							Description: "The version of the resource as defined by the operator",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"targetVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The desired version of the CDI resource",
+							Description: "The desired version of the resource",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"observedVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The observed version of the CDI resource",
+							Description: "The observed version of the resource",
 							Type:        []string{"string"},
 							Format:      "",
 						},

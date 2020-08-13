@@ -17,10 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	sdkapi "github.com/kubevirt/controller-lifecycle-operator-sdk/pkg/sdk/api"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	conditions "github.com/openshift/custom-resource-status/conditions/v1"
 )
 
 // DataVolume is an abstraction on top of PersistentVolumeClaims to allow easy population of those PersistentVolumeClaims with relation to VirtualMachines
@@ -269,39 +268,8 @@ type CDIPhase string
 
 // CDIStatus defines the status of the CDI installation
 type CDIStatus struct {
-	Phase CDIPhase `json:"phase,omitempty"`
-	// A list of current conditions of the CDI resource
-	Conditions []conditions.Condition `json:"conditions,omitempty" optional:"true"`
-	// The version of the CDI resource as defined by the operator
-	OperatorVersion string `json:"operatorVersion,omitempty" optional:"true"`
-	// The desired version of the CDI resource
-	TargetVersion string `json:"targetVersion,omitempty" optional:"true"`
-	// The observed version of the CDI resource
-	ObservedVersion string `json:"observedVersion,omitempty" optional:"true"`
+	sdkapi.Status `json:",inline"`
 }
-
-const (
-	// CDIPhaseDeploying signals that the CDI resources are being deployed
-	CDIPhaseDeploying CDIPhase = "Deploying"
-
-	// CDIPhaseDeployed signals that the CDI resources are successflly deployed
-	CDIPhaseDeployed CDIPhase = "Deployed"
-
-	// CDIPhaseDeleting signals that the CDI resources are being removed
-	CDIPhaseDeleting CDIPhase = "Deleting"
-
-	// CDIPhaseDeleted signals that the CDI resources are deleted
-	CDIPhaseDeleted CDIPhase = "Deleted"
-
-	// CDIPhaseError signals that the CDI deployment is in an error state
-	CDIPhaseError CDIPhase = "Error"
-
-	// CDIPhaseUpgrading signals that the CDI resources are being deployed
-	CDIPhaseUpgrading CDIPhase = "Upgrading"
-
-	// CDIPhaseEmpty is an uninitialized phase
-	CDIPhaseEmpty CDIPhase = ""
-)
 
 //CDIList provides the needed parameters to do request a list of CDIs from the system
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

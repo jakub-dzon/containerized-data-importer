@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"kubevirt.io/containerized-data-importer/pkg/operator/controller"
 	"os"
 	"runtime"
 
@@ -32,7 +33,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
 	cdiv1 "kubevirt.io/containerized-data-importer/pkg/apis/core/v1beta1"
-	"kubevirt.io/containerized-data-importer/pkg/operator/controller"
 	"kubevirt.io/containerized-data-importer/pkg/util"
 )
 

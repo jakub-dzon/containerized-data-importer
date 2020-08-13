@@ -46,16 +46,15 @@ func createAPIServerResources(args *FactoryArgs) []runtime.Object {
 }
 
 func createAPIServerServiceAccount() *corev1.ServiceAccount {
-	return utils.CreateServiceAccount(apiServerRessouceName)
+	return utils.ResourcesBuiler.CreateServiceAccount(apiServerRessouceName)
 }
 
 func createAPIServerRoleBinding() *rbacv1.RoleBinding {
-	return utils.CreateRoleBinding(apiServerRessouceName, apiServerRessouceName, apiServerRessouceName, "")
+	return utils.ResourcesBuiler.CreateRoleBinding(apiServerRessouceName, apiServerRessouceName, apiServerRessouceName, "")
 }
 
 func createAPIServerRole() *rbacv1.Role {
-	role := utils.CreateRole(apiServerRessouceName)
-	role.Rules = []rbacv1.PolicyRule{
+	rules := []rbacv1.PolicyRule{
 		{
 			APIGroups: []string{
 				"",
@@ -69,11 +68,11 @@ func createAPIServerRole() *rbacv1.Role {
 			},
 		},
 	}
-	return role
+	return utils.ResourcesBuiler.CreateRole(apiServerRessouceName, rules)
 }
 
 func createAPIServerService() *corev1.Service {
-	service := utils.CreateService("cdi-api", cdiLabel, apiServerRessouceName)
+	service := utils.ResourcesBuiler.CreateService("cdi-api", cdiLabel, apiServerRessouceName, nil)
 	service.Spec.Ports = []corev1.ServicePort{
 		{
 			Port: 443,
@@ -90,7 +89,7 @@ func createAPIServerService() *corev1.Service {
 func createAPIServerDeployment(image, verbosity, pullPolicy string) *appsv1.Deployment {
 	defaultMode := corev1.ConfigMapVolumeSourceDefaultMode
 	deployment := utils.CreateDeployment(apiServerRessouceName, cdiLabel, apiServerRessouceName, apiServerRessouceName, 1)
-	container := utils.CreateContainer(apiServerRessouceName, image, verbosity, corev1.PullPolicy(pullPolicy))
+	container := utils.CreateContainer(apiServerRessouceName, image, verbosity, pullPolicy)
 	container.ReadinessProbe = &corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{

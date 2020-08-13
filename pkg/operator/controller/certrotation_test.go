@@ -3,6 +3,9 @@ package controller
 import (
 	"context"
 
+	"github.com/jakub-dzon/operator-cert-rotation-sdk/pkg/sdk/certrotation"
+
+	sdkcertapi "github.com/jakub-dzon/operator-cert-rotation-sdk/pkg/sdk/certrotation/api"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -14,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"kubevirt.io/containerized-data-importer/pkg/operator/resources/cert"
-	cdicerts "kubevirt.io/containerized-data-importer/pkg/operator/resources/cert"
 )
 
 const testCertData = "test"
@@ -24,7 +26,7 @@ type fakeCertManager struct {
 	namespace string
 }
 
-func (tcm *fakeCertManager) Sync(certs []cdicerts.CertificateDefinition) error {
+func (tcm *fakeCertManager) Sync(certs []sdkcertapi.CertificateDefinition) error {
 	cm := &corev1.ConfigMap{}
 	key := client.ObjectKey{Namespace: tcm.namespace, Name: "cdi-uploadproxy-signer-bundle"}
 	err := tcm.client.Get(context.TODO(), key, cm)
@@ -39,12 +41,12 @@ func (tcm *fakeCertManager) Sync(certs []cdicerts.CertificateDefinition) error {
 }
 
 // creating certs is really CPU intensive so mocking out a CertManager to just create what we need
-func newFakeCertManager(crClient client.Client, namespace string) CertManager {
+func newFakeCertManager(crClient client.Client, namespace string) certrotation.CertManager {
 	return &fakeCertManager{client: crClient, namespace: namespace}
 }
 
-func newCertManagerForTest(client kubernetes.Interface, namespace string) CertManager {
-	return newCertManager(client, namespace)
+func newCertManagerForTest(client kubernetes.Interface, namespace string) certrotation.CertManager {
+	return certrotation.NewCertManagerForClient(client, namespace)
 }
 
 func checkSecret(client kubernetes.Interface, namespace, name string, exists bool) {

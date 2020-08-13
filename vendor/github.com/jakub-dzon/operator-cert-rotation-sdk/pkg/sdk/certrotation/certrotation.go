@@ -14,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package certrotation
 
 import (
 	"crypto/x509"
 	"fmt"
 
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	certapi "github.com/jakub-dzon/operator-cert-rotation-sdk/pkg/sdk/certrotation/api"
 	"github.com/openshift/library-go/pkg/crypto"
 	"github.com/openshift/library-go/pkg/operator/certrotation"
 	"github.com/openshift/library-go/pkg/operator/events"
@@ -28,13 +31,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 	toolscache "k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	cdicerts "kubevirt.io/containerized-data-importer/pkg/operator/resources/cert"
 )
+
+var log = logf.Log.WithName("cert-manager")
 
 // CertManager is the client interface to the certificate manager/refresher
 type CertManager interface {
-	Sync(certs []cdicerts.CertificateDefinition) error
+	Sync(certs []certapi.CertificateDefinition) error
 }
 
 type certManager struct {
@@ -52,7 +55,7 @@ func NewCertManager(mgr manager.Manager, installNamespace string, additionalName
 		return nil, err
 	}
 
-	cm := newCertManager(k8sClient, installNamespace, additionalNamespaces...)
+	cm := NewCertManagerForClient(k8sClient, installNamespace, additionalNamespaces...)
 
 	// so we can start caches
 	if err = mgr.Add(cm); err != nil {
@@ -62,7 +65,7 @@ func NewCertManager(mgr manager.Manager, installNamespace string, additionalName
 	return cm, nil
 }
 
-func newCertManager(client kubernetes.Interface, installNamespace string, additionalNamespaces ...string) *certManager {
+func NewCertManagerForClient(client kubernetes.Interface, installNamespace string, additionalNamespaces ...string) *certManager {
 	namespaces := append(additionalNamespaces, installNamespace)
 	informers := v1helpers.NewKubeInformersForNamespaces(client, namespaces...)
 
@@ -101,7 +104,7 @@ func (cm *certManager) Start(stopCh <-chan struct{}) error {
 	return nil
 }
 
-func (cm *certManager) Sync(certs []cdicerts.CertificateDefinition) error {
+func (cm *certManager) Sync(certs []certapi.CertificateDefinition) error {
 	for _, cd := range certs {
 		ca, err := cm.ensureSigner(cd)
 		if err != nil {
@@ -129,7 +132,7 @@ func (cm *certManager) Sync(certs []cdicerts.CertificateDefinition) error {
 	return nil
 }
 
-func (cm *certManager) ensureSigner(cd cdicerts.CertificateDefinition) (*crypto.CA, error) {
+func (cm *certManager) ensureSigner(cd certapi.CertificateDefinition) (*crypto.CA, error) {
 	secret := cd.SignerSecret
 	lister := cm.informers.InformersFor(secret.Namespace).Core().V1().Secrets().Lister()
 	sr := certrotation.SigningRotation{
@@ -150,7 +153,7 @@ func (cm *certManager) ensureSigner(cd cdicerts.CertificateDefinition) (*crypto.
 	return ca, nil
 }
 
-func (cm *certManager) ensureCertBundle(cd cdicerts.CertificateDefinition, ca *crypto.CA) ([]*x509.Certificate, error) {
+func (cm *certManager) ensureCertBundle(cd certapi.CertificateDefinition, ca *crypto.CA) ([]*x509.Certificate, error) {
 	configMap := cd.CertBundleConfigmap
 	lister := cm.informers.InformersFor(configMap.Namespace).Core().V1().ConfigMaps().Lister()
 	br := certrotation.CABundleRotation{
@@ -169,7 +172,7 @@ func (cm *certManager) ensureCertBundle(cd cdicerts.CertificateDefinition, ca *c
 	return certs, nil
 }
 
-func (cm *certManager) ensureTarget(cd cdicerts.CertificateDefinition, ca *crypto.CA, bundle []*x509.Certificate) error {
+func (cm *certManager) ensureTarget(cd certapi.CertificateDefinition, ca *crypto.CA, bundle []*x509.Certificate) error {
 	secret := cd.TargetSecret
 	var targetCreator certrotation.TargetCertCreator
 	if cd.TargetService != nil {

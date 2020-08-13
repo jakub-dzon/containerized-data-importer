@@ -3245,25 +3245,25 @@
     "nullable": true,
     "properties": {
      "conditions": {
-      "description": "A list of current conditions of the CDI resource",
+      "description": "A list of current conditions of the resource",
       "type": "array",
       "items": {
        "$ref": "#/definitions/v1.Condition"
       }
      },
      "observedVersion": {
-      "description": "The observed version of the CDI resource",
+      "description": "The observed version of the resource",
       "type": "string"
      },
      "operatorVersion": {
-      "description": "The version of the CDI resource as defined by the operator",
+      "description": "The version of the resource as defined by the operator",
       "type": "string"
      },
      "phase": {
       "type": "string"
      },
      "targetVersion": {
-      "description": "The desired version of the CDI resource",
+      "description": "The desired version of the resource",
       "type": "string"
      }
     }
